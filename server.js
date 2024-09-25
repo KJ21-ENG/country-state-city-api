@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 
 // Load the JSON file
-const dataFilePath = path.join(__dirname, 'countries+states+cities.json');
+const dataFilePath = path.join(__dirname, './countries+states+cities.json');
 let data;
 
 try {
@@ -88,3 +88,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+console.log("Data file path:", dataFilePath);
