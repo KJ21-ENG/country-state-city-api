@@ -8,13 +8,16 @@ const app = express();
 // Enable CORS to allow API requests from different origins (e.g., FlutterFlow app)
 app.use(cors());
 
+// Log when the server starts
+console.log("Server starting, registering routes...");
+
 // Load the JSON file
-const dataFilePath = path.join(__dirname, './countries+states+cities.json');
+const dataFilePath = path.join(__dirname, 'countries+states+cities.json');
 let data;
 
 try {
   data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-  console.log("Data successfully loaded.");
+  console.log("Data successfully loaded:", data); // Log the loaded data
 } catch (err) {
   console.error("Error loading or parsing the JSON file:", err);
 }
@@ -24,14 +27,16 @@ try {
  * -----------------------------------------
  */
 app.get('/countries', (req, res) => {
-  console.log("Fetching countries...");
+  console.log("Received request for /countries");
 
   // Check if 'data' is loaded correctly and is an array
   if (!data || !Array.isArray(data)) {
+    console.error("Countries data not found or not an array");
     return res.status(500).json({ message: 'Countries data not found' });
   }
 
   // Return the list of countries
+  console.log("Countries data found, returning response");
   const countries = data.map((country) => ({
     id: country.id,
     name: country.name,
@@ -44,10 +49,12 @@ app.get('/countries', (req, res) => {
  * -----------------------------------------
  */
 app.get('/states/:countryId', (req, res) => {
+  console.log("Received request for /states/:countryId");
   const countryId = parseInt(req.params.countryId, 10);
   const country = data.find((c) => c.id === countryId);
 
   if (!country || !country.states) {
+    console.error(`Country with ID ${countryId} or states not found`);
     return res.status(404).json({ message: 'Country or states not found' });
   }
 
@@ -63,6 +70,7 @@ app.get('/states/:countryId', (req, res) => {
  * -----------------------------------------
  */
 app.get('/cities/:stateId', (req, res) => {
+  console.log("Received request for /cities/:stateId");
   const stateId = parseInt(req.params.stateId, 10);
 
   let cities = [];
@@ -77,6 +85,7 @@ app.get('/cities/:stateId', (req, res) => {
   });
 
   if (cities.length === 0) {
+    console.error(`State with ID ${stateId} or cities not found`);
     return res.status(404).json({ message: 'State or cities not found' });
   }
 
@@ -88,5 +97,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-console.log("Data file path:", dataFilePath);
