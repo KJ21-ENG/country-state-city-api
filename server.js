@@ -5,11 +5,19 @@ const cors = require('cors');
 
 const app = express();
 
-// Enable CORS to allow API requests from different origins (e.g., FlutterFlow app)
+// Enable CORS
 app.use(cors());
 
-// Log when the server starts
-console.log("Server starting, registering routes...");
+// Log all incoming requests for debugging
+app.use((req, res, next) => {
+  console.log(`Received request: ${req.method} ${req.url}`);
+  next();
+});
+
+// Root route for testing
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 
 // Load the JSON file
 const dataFilePath = path.join(__dirname, 'countries+states+cities.json');
@@ -17,7 +25,7 @@ let data;
 
 try {
   data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-  console.log("Data successfully loaded:", data); // Log the loaded data
+  console.log("Data successfully loaded");
 } catch (err) {
   console.error("Error loading or parsing the JSON file:", err);
 }
@@ -29,18 +37,16 @@ try {
 app.get('/countries', (req, res) => {
   console.log("Received request for /countries");
 
-  // Check if 'data' is loaded correctly and is an array
   if (!data || !Array.isArray(data)) {
     console.error("Countries data not found or not an array");
     return res.status(500).json({ message: 'Countries data not found' });
   }
 
-  // Return the list of countries
-  console.log("Countries data found, returning response");
   const countries = data.map((country) => ({
     id: country.id,
     name: country.name,
   }));
+
   res.json(countries);
 });
 
@@ -92,7 +98,7 @@ app.get('/cities/:stateId', (req, res) => {
   res.json(cities);
 });
 
-// Start the server, use Render's assigned port or default to 3000
+// Start the server, use Render's assigned port or default to 3000 for local development
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
